@@ -21,7 +21,7 @@ python export.py dist/slam-basics/index.html --fig tri --format pdf --diagram-on
 | `theme/` | `template.html`, `report.css`, `charts.js` (all figure types) |
 | `templates/post/` | Starter post copied by `build.py new` |
 | `posts/` | Example posts: SLAM basics, DeFM control stack, two AUV navigation stacks |
-| `latex/` | Hand-written TikZ figures (VAE, convolutional encoder), each with a standalone build |
+| `latex/` | Hand-written TikZ figures (VAE, convolutional encoder, RNN / LSTM / GRU cells), each with a standalone build |
 | `site.yaml` | Site name, author, footer |
 
 ## Using it from another repository
@@ -77,8 +77,37 @@ Then, in the thesis, point the figure at its images before including it:
 \end{figure}
 ```
 
-The TikZ figures need `tikz` (with `\usetikzlibrary{arrows.meta, positioning}`), `graphicx`,
+The TikZ figures need `tikz` (with `\usetikzlibrary{arrows.meta, positioning}`, plus `shapes.geometric` for `latex/rnn`), `graphicx`,
 `amsmath` and `amssymb`. Overleaf compiles them like any other source; nothing here runs Python there.
+
+## RNN, LSTM and GRU cells (`latex/rnn/`)
+
+The diagrams from C. Olah's *Understanding LSTM Networks* (2015), redrawn in this style. All cells are
+macros in `rnn-style.tex`; each figure file loads it, so several can share one document.
+`./build.sh` writes every variant to `latex/rnn/pdf/`:
+
+| PDF | Figure file and options |
+|---|---|
+| `rnn-rolled`, `rnn-unrolled`, `rnn-short-term`, `rnn-long-term` | `rnn-unrolled.tex`, `\def\rnnunrolled{rolled\|full\|short\|long}` |
+| `rnn-chain`, `lstm-chain` | three repeating modules (the LSTM chain is about 25 cm wide: wrap it in `\resizebox`) |
+| `lstm-notation`, `lstm-gate` | legend, and a single gate |
+| `lstm-cell`, `lstm-cline`, `lstm-focus-{f,i,c,o}` | `lstm-cell.tex`, `\def\rnnfocus{none\|cline\|f\|i\|c\|o}` |
+| `lstm-peephole`, `lstm-coupled` | `lstm-cell.tex`, `\def\rnnvariant{peephole\|coupled}` |
+| `gru-cell` | `gru-cell.tex` |
+
+```latex
+\newcommand{\rnndir}{vendor/quietreport/latex/rnn}   % where the folder lives
+\begin{figure}[H]\centering
+  \def\rnnfocus{f}                                     % optional, local to the figure
+  \input{\rnndir/lstm-cell.tex}
+  \caption{...}\label{fig:lstm-forget}
+\end{figure}
+```
+
+Symbols are macros, so a document can rename them to fit its notation: `\rnnx`, `\rnnh`, `\rnnc`
+(input, hidden state, LSTM cell state; bold x, h, c) and `\rnnzg`, `\rnnrg` (GRU update and reset
+gates; bold z, r), e.g. `\renewcommand{\rnnzg}{\mathbf{u}}` after the first figure, or
+`\newcommand` before it.
 
 ## Exporting figures
 

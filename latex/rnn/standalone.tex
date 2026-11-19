@@ -1,0 +1,9 @@
+% Builds one figure as a tightly cropped PDF. See build.sh, e.g.
+%   pdflatex -jobname=lstm-focus-f "\def\rnnfig{lstm-cell}\def\rnnfocus{f}\input{standalone.tex}"
+\documentclass[tikz, border=2pt]{standalone}
+\usepackage{amsmath,amssymb}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+\newcommand{\rnndir}{.}
+\begin{document}
+\input{\rnnfig.tex}
+\end{document}

@@ -1,0 +1,13 @@
+% A gate: a sigmoid layer and a point-wise multiplication.
+% Use:  \input{latex/rnn/lstm-gate.tex}
+\providecommand{\rnndir}{latex/rnn}
+\input{\rnndir/rnn-style.tex}
+\begin{tikzpicture}[rnn]
+  \path[cell] (0,0) rectangle (2.2,2.6);
+  \node[layer] (s) at (1.1,0.85) {$\sigma$};
+  \node[op] (m) at (1.1,1.95) {$\times$};
+  \draw[wire] (1.1,-0.5) -- (s);
+  \draw[wire] (s) -- (m);
+  \draw[wire] (-0.6,1.95) -- (m);
+  \draw[wire] (m) -- (2.8,1.95);
+\end{tikzpicture}

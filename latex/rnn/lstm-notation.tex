@@ -1,0 +1,20 @@
+% Legend for the cell diagrams: layer, point-wise operation, transfer, concatenate, copy.
+% Use:  \input{latex/rnn/lstm-notation.tex}
+\providecommand{\rnndir}{latex/rnn}
+\input{\rnndir/rnn-style.tex}
+\begin{tikzpicture}[rnn]
+  \node[layer, minimum width=0.9cm, minimum height=0.55cm] at (0,0) {};
+  \node[op, minimum size=15pt] at (2.6,0) {};
+  \draw[wire] (4.6,0) -- (5.9,0);
+  \draw[line] (7.4,0.35) -| (8.1,0);
+  \draw[line] (7.4,-0.35) -| (8.1,0);
+  \fill[dot] (8.1,0) circle (1.3pt);
+  \draw[wire] (8.1,0) -- (8.8,0);
+  \draw[line] (10.2,0) -- (10.9,0);
+  \fill[dot] (10.9,0) circle (1.3pt);
+  \draw[wire] (10.9,0) |- (11.6,0.35);
+  \draw[wire] (10.9,0) |- (11.6,-0.35);
+  \foreach \x/\t in {0/{Neural network\\layer}, 2.6/{Point-wise\\operation}, 5.25/{Vector\\transfer},
+                     8.1/Concatenate, 10.9/Copy}
+    \node[vcap, anchor=north] at (\x,-0.7) {\t};
+\end{tikzpicture}
