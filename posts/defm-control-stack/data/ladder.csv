@@ -1,0 +1,6 @@
+model,value
+CNN from scratch,90.45
+ImageNet,89.29
+VAE,89.75
+DINOv3,89.59
+DeFM,90.14

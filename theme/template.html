@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+{{CSS}}</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <pattern id="h-s2" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" class="hb-s2"/><line x1="0" y1="0" x2="0" y2="5" class="hp hp-s2"/></pattern>
+  <pattern id="h-s3" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" class="hb-s3"/><circle cx="3" cy="3" r="1.7" class="hp-ring"/></pattern>
+  <pattern id="h-cx" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" class="hb-cx"/><circle cx="2" cy="2" r=".65" class="hp-dot"/></pattern>
+  <pattern id="h-band" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" class="hb-band"/><circle cx="2.5" cy="2.5" r=".6" class="hp-bdot"/></pattern>
+  <filter id="rough" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="1" seed="4" result="t"/>
+    <feDisplacementMap in="SourceGraphic" in2="t" scale="1.1" xChannelSelector="R" yChannelSelector="G" result="d"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="9" result="n"/>
+    <feColorMatrix in="n" values="0 0 0 0 .25  0 0 0 0 .22  0 0 0 0 .4  0 0 0 .18 -.02" result="g"/>
+    <feComposite in="g" in2="d" operator="in" result="gi"/>
+    <feMerge><feMergeNode in="d"/><feMergeNode in="gi"/></feMerge>
+  </filter>
+</defs></svg>
+<header class="top"><div class="top-in"><a href="{{HOME}}">{{SITE}}</a></div></header>
+<div class="shell">
+  <aside class="side">{{TOC}}</aside>
+  <main>
+    <h1>{{TITLE}}</h1>
+    <p class="byline">{{BYLINE}}</p>
+    {{COVER}}
+    {{INTRO}}
+    {{FINDINGS}}
+    <div class="toc-inline">{{TOC}}</div>
+    <article>
+{{BODY}}
+    </article>
+  </main>
+</div>
+<footer class="bottom">{{FOOTER}}</footer>
+<script type="application/json" id="qr-specs">{{SPECS}}</script>
+<script>
+{{JS}}
+</script>
+<script src="{{MATHJAX}}" async></script>
+</body>
+</html>

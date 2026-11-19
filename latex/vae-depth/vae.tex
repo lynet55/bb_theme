@@ -1,0 +1,105 @@
+% VAE for depth: input, target and reconstruction.
+% Use inside a figure environment:  \input{latex/vae-depth/vae.tex}
+% Needs: tikz, graphicx, amsmath, amssymb, siunitx (all in the thesis preamble).
+% Images are illustrative (see make_images.py). Set \vaeimgdir to the img folder.
+\providecommand{\vaeimgdir}{latex/vae-depth/img}
+\providecommand{\Lc}{}
+\renewcommand{\Lc}[1]{\mathcal{L}_{\mathrm{#1}}}
+\definecolor{vaeInk}{HTML}{0F1B2D}
+\definecolor{vaeHatch}{HTML}{2F3FD0}
+\definecolor{vaeSignal}{HTML}{1D5FD1}
+\definecolor{vaeMuted}{HTML}{56677F}
+\definecolor{vaeFill}{HTML}{EEF3FB}
+\begin{tikzpicture}[
+    font=\small, line cap=round, line join=round,
+    wire/.style={draw=vaeInk, line width=0.6pt, -{Stealth[length=4.5pt, width=3.5pt]}},
+    loss/.style={draw=vaeMuted, line width=0.6pt, dash pattern=on 2.5pt off 1.8pt, -{Stealth[length=4.5pt, width=3.5pt]}},
+    net/.style={draw=vaeInk, line width=0.7pt, fill=vaeFill},
+    lbox/.style={draw=vaeInk, line width=0.6pt, fill=vaeFill, rounded corners=1.5pt, inner sep=4pt},
+    op/.style={circle, draw=vaeInk, line width=0.6pt, fill=white, minimum size=13pt, inner sep=0pt},
+    frame/.style={draw=vaeInk, line width=0.6pt},
+    vcap/.style={font=\footnotesize, text=vaeMuted},
+  ]
+  % ---------- sizes ----------
+  \def\iw{2.4}\def\ih{1.8}   % image width and height (cm), 128 x 96 px
+  \def\cs{0.17}              % vector cell size
+
+  % ---------- input D_t ----------
+  \node[inner sep=0, anchor=center] (din) at (1.2,0) {\includegraphics[width=\iw cm, height=\ih cm]{\vaeimgdir/depth.png}};
+  \draw[frame] (din.south west) rectangle (din.north east);
+  \node[above=2pt of din.north] {$D_t\in\mathbb{R}_{\ge 0}^{96\times128}$};
+  % depth scale under the input
+  \node[inner sep=0, anchor=north west] (cb) at ([yshift=-7pt]din.south west) {\includegraphics[width=\iw cm, height=0.12cm]{\vaeimgdir/colorbar.png}};
+  \draw[vaeInk, line width=0.4pt] (cb.south west) rectangle (cb.north east);
+  \node[vcap, anchor=north west, inner sep=1pt] at (cb.south west) {\SI{0}{\metre}};
+  \node[vcap, anchor=north east, inner sep=1pt] at (cb.south east) {\SI{12}{\metre}};
+  \node[vcap, anchor=north, inner sep=1pt] at (cb.south) {depth};
+
+  % ---------- encoder ----------
+  \draw[net] (3.0,0.9) -- (5.0,0.45) -- (5.0,-0.45) -- (3.0,-0.9) -- cycle;
+  \node at (4.0,0.12) {Encoder};
+  \node[font=\footnotesize] at (4.0,-0.25) {$q(\mathbf{z}\mid D_t;\mathbf{w}_{\mathrm{enc}})$};
+  \draw[wire] (din.east) -- (3.0,0);
+
+  % ---------- mean and std vectors ----------
+  \foreach \i/\s in {0/25,1/60,2/40,3/80,4/15,5/50} {
+    \fill[vaeSignal!\s!white] (5.55,0.18+\i*\cs) rectangle ++(\cs,\cs);
+  }
+  \draw[vaeInk, line width=0.5pt, step=\cs, shift={(5.55,0.18)}] (0,0) grid (\cs,6*\cs);
+  \foreach \i/\s in {0/20,1/35,2/15,3/45,4/25,5/30} {
+    \fill[vaeHatch!\s!white] (5.55,-0.18-6*\cs+\i*\cs) rectangle ++(\cs,\cs);
+  }
+  \draw[vaeInk, line width=0.5pt, step=\cs, shift={(5.55,-0.18-6*\cs)}] (0,0) grid (\cs,6*\cs);
+  \coordinate (mu) at (5.55+\cs,0.18+3*\cs);
+  \coordinate (sg) at (5.55+\cs,-0.18-3*\cs);
+  \node[anchor=south] at (5.55+\cs/2,0.18+6*\cs) {$\boldsymbol{\mu}^{\mathrm{VAE}}_t$};
+  \node[anchor=north] at (5.55+\cs/2,-0.18-6*\cs) {$\boldsymbol{\sigma}^{\mathrm{VAE}}_t$};
+  \draw[wire] (5.0,0.3) -- (5.55,0.3);
+  \draw[wire] (5.0,-0.3) -- (5.55,-0.3);
+
+  % ---------- reparameterisation: z = mu + sigma (.) xi ----------
+  \node[op] (prod) at (6.75,-0.69) {$\odot$};
+  \node[op] (sum)  at (7.25,0) {$+$};
+  \draw[wire] (sg) -- (prod.west);
+  \draw[wire] (mu) -| (sum.north);
+  \draw[wire] (prod.east) -| (sum.south);
+  \node[font=\footnotesize, anchor=north] (xi) at (6.95,-1.45) {$\boldsymbol{\xi}\sim\mathcal{N}(\mathbf{0},\mathbf{I})$};
+  \draw[wire] (prod.south |- xi.north) -- (prod.south);
+
+  % ---------- latent ----------
+  \foreach \i/\s in {0/55,1/20,2/70,3/35,4/45,5/10} {
+    \fill[vaeSignal!\s!white] (7.85,-3*\cs+\i*\cs) rectangle ++(\cs,\cs);
+  }
+  \draw[vaeSignal, line width=0.7pt, step=\cs, shift={(7.85,-3*\cs)}] (0,0) grid (\cs,6*\cs);
+  \draw[wire] (sum.east) -- (7.85,0);
+  \node[anchor=south west, inner sep=1pt] at (7.78,3*\cs+0.1) {$\mathbf{z}^{\mathrm{VAE}}_t\in\mathbb{R}^{d_{\mathrm{VAE}}}$};
+
+  % ---------- decoder ----------
+  \draw[net] (8.6,0.45) -- (10.6,0.9) -- (10.6,-0.9) -- (8.6,-0.45) -- cycle;
+  \node at (9.6,0.12) {Decoder};
+  \node[font=\footnotesize] at (9.6,-0.25) {$\mathrm{Dec}(\mathbf{z};\mathbf{w}_{\mathrm{dec}})$};
+  \draw[wire] (7.85+\cs,0) -- (8.6,0);
+
+  % ---------- reconstruction ----------
+  \node[inner sep=0] (rec) at (12.4,0) {\includegraphics[width=\iw cm, height=\ih cm]{\vaeimgdir/recon.png}};
+  \draw[frame] (rec.south west) rectangle (rec.north east);
+  \node[above=2pt of rec.north] {$\hat{D}^{\mathrm{col}}_t$};
+  \draw[wire] (10.6,0) -- (rec.west);
+
+  % ---------- target ----------
+  \node[inner sep=0] (tgt) at (12.4,-3.1) {\includegraphics[width=\iw cm, height=\ih cm]{\vaeimgdir/target.png}};
+  \draw[frame] (tgt.south west) rectangle (tgt.north east);
+  \node[below=2pt of tgt.south] {$D^{\mathrm{col}}_t$};
+  \node[vcap, below=14pt of tgt.south, align=center] {hatched: $\Omega_t=0$};
+
+  % ---------- losses ----------
+  \node[lbox] (lrec) at (8.35,-3.1) {$\Lc{rec}=\bigl\lVert \Omega_t\odot\bigl(D^{\mathrm{col}}_t-\hat{D}^{\mathrm{col}}_t\bigr)\bigr\rVert_2^2$};
+  \node[lbox] (lkl)  at (3.3,-3.1) {$\Lc{KL}=D_{\mathrm{KL}}\bigl(q(\mathbf{z}\mid D_t)\,\Vert\,\mathcal{N}(\mathbf{0},\mathbf{I})\bigr)$};
+  \draw[loss] (tgt.west) -- (lrec.east);
+  \draw[loss] ([xshift=-0.55cm]rec.south) |- ++(-1.4,-0.75) -| ([xshift=0.9cm]lrec.north);
+  \draw[loss] (5.55+\cs/2,-0.18-6*\cs-0.42) -- (5.55+\cs/2,-2.35) -| ([xshift=1.2cm]lkl.north);
+  \node[op] (tot) at (5.85,-4.45) {$+$};
+  \draw[loss] (lrec.south) |- (tot.east);
+  \draw[loss] (lkl.south) |- node[pos=0.75, above, font=\footnotesize] {$\beta$} (tot.west);
+  \draw[wire] (tot.south) -- ++(0,-0.45) node[below] {$\mathcal{L}^{\mathrm{VAE}}(\mathbf{w}_{\mathrm{enc}},\mathbf{w}_{\mathrm{dec}})$};
+\end{tikzpicture}

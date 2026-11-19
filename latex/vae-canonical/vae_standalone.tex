@@ -1,0 +1,10 @@
+% Builds vae.pdf: the figure alone, tightly cropped, transparent background.
+%   pdflatex vae_standalone.tex
+\documentclass[tikz, border=2pt]{standalone}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usetikzlibrary{arrows.meta, positioning}
+\newcommand{\vaeimgdir}{img}
+\begin{document}
+\input{vae.tex}
+\end{document}

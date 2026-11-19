@@ -1,0 +1,6 @@
+is_odo,is_closed,is_gt,seen_txt,x,y
+1,0,0,start of the lap,2.549,-1.3993
+1,0,0,end of the lap,4.4166,-3.4899
+0,1,0,start of the lap,2.469,-1.3271
+0,1,0,end of the lap,1.8883,-2.386
+0,0,1,true,2.5,-1.4

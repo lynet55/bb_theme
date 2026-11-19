@@ -1,0 +1,17 @@
+# built pages and exports (rebuild with build.py / export.py)
+dist/
+export/
+# Python
+__pycache__/
+*.pyc
+.venv/
+# LaTeX build files from the standalone figures
+latex/**/*.aux
+latex/**/*.log
+latex/**/*.fls
+latex/**/*.fdb_latexmk
+latex/**/*.synctex.gz
+# editors and OS
+.DS_Store
+.vscode/
+.idea/

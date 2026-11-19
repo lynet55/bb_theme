@@ -1,0 +1,17 @@
+model,panel,value,ylabel
+ImageNet,"Frozen, training noise",0.6576,Relative to teacher
+ImageNet,"Frozen, Kinect noise",0.0043,Relative to teacher
+ImageNet,"Fine-tuned, training noise",0.795,Relative to teacher
+ImageNet,"Fine-tuned, Kinect noise",0.7366,Relative to teacher
+VAE,"Frozen, training noise",0.6894,Relative to teacher
+VAE,"Frozen, Kinect noise",0.0219,Relative to teacher
+VAE,"Fine-tuned, training noise",0.8105,Relative to teacher
+VAE,"Fine-tuned, Kinect noise",0.0379,Relative to teacher
+DINOv3,"Frozen, training noise",0.6532,Relative to teacher
+DINOv3,"Frozen, Kinect noise",0.2075,Relative to teacher
+DINOv3,"Fine-tuned, training noise",0.8243,Relative to teacher
+DINOv3,"Fine-tuned, Kinect noise",0.7837,Relative to teacher
+DeFM,"Frozen, training noise",0.8089,Relative to teacher
+DeFM,"Frozen, Kinect noise",0.486,Relative to teacher
+DeFM,"Fine-tuned, training noise",0.8936,Relative to teacher
+DeFM,"Fine-tuned, Kinect noise",0.8763,Relative to teacher

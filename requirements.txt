@@ -1,0 +1,9 @@
+# build.py
+markdown>=3.4
+pyyaml>=6.0
+# export.py (optional): also run `playwright install chromium`
+playwright>=1.40
+# example data scripts in posts/*/make_data.py (optional)
+numpy
+scipy
+pillow
