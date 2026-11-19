@@ -285,3 +285,5 @@ mjx-container{color:inherit}
 .chart svg.plane [data-tip]{cursor:default}
 .st-box.st-muted{fill:#fff;stroke:var(--ink-3);stroke-dasharray:3 2} .st-box.st-hl{fill:#e3edfb;stroke:var(--signal);stroke-width:1.3} .st-box.st-prior{fill:var(--ink);stroke:var(--ink)}
 .pl-text.pl-big{font-size:15px;fill:var(--ink)}
+.pl-halo{stroke:#fff;stroke-width:6;stroke-opacity:.9}
+.mth.halo{filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 2px #fff)}

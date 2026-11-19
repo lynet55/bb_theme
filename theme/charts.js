@@ -755,7 +755,7 @@
     const label = (q, px, py, sc) => {
       if (!q.label) return;
       const o = q.label_off || [10, -10];
-      mathNode(top, String(q.label), px + o[0], py + o[1], q.label_size || 14, q.label_cls || (String(pick(q, sc) || '').includes('hl') ? 'hl' : ''), q.label_anchor);
+      mathNode(top, String(q.label), px + o[0], py + o[1], q.label_size || 14, (q.label_cls || (String(pick(q, sc) || '').includes('hl') ? 'hl' : '')) + (q.label_halo ? ' halo' : ''), q.label_anchor);
     };
     const dot = (q, x, y, sc, tg) => { const G = tg || g;
       const px = X(x), py = Y(y), sz = val(q.size, sc) || 3.2, sh = q.shape || 'dot', c = cls(pick(q, sc), 'pt sh-' + sh), t = tip(q.tip, sc), a = t ? { 'data-tip': t } : {};
@@ -770,7 +770,10 @@
       if (q.clip_box) { const cid = id + 'b' + Math.random().toString(36).slice(2, 6), b2 = q.clip_box.map(v => val(v)), cpp = el('clipPath', { id: cid }, el('defs', {}, svg));
         el('rect', { x: Math.min(X(b2[0]), X(b2[2])), y: Math.min(Y(b2[1]), Y(b2[3])), width: Math.abs(X(b2[2]) - X(b2[0])), height: Math.abs(Y(b2[3]) - Y(b2[1])) }, cpp); gg = el('g', { 'clip-path': `url(#${cid})` }, gg); }
       const k = q.kind, rows = q.rows || [];
-      if (k === 'field') {
+      if (k === 'image') {
+        const x0 = val(q.at[0]), y0 = val(q.at[1]), x1 = x0 + val(q.w), y1 = y0 + val(q.h);
+        el('image', { href: q.src, x: Math.min(X(x0), X(x1)), y: Math.min(Y(y0), Y(y1)), width: Math.abs(X(x1) - X(x0)), height: Math.abs(Y(y1) - Y(y0)), preserveAspectRatio: 'none', opacity: q.opacity != null ? q.opacity : null }, gg);
+      } else if (k === 'field') {
         const n = q.res || 64, fz = F(q.f), sc = Object.create(S), vals = [];
         for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { sc.x = xr[0] + (i + 0.5) / n * (xr[1] - xr[0]); sc.y = yr[0] + (j + 0.5) / n * (yr[1] - yr[0]); let v = fz(sc); if (q.log) v = Math.log(1e-9 + Math.max(0, v)); vals.push([i, j, v]); }
         const vs = vals.map(v => v[2]).filter(isFinite).sort((a, b) => a - b), L = q.levels || 9, lo = vs[0], hi = q.clip_quantile ? vs[Math.floor(vs.length * q.clip_quantile)] : vs[vs.length - 1];
@@ -782,12 +785,14 @@
       } else if (k === 'curve') {
         const n = q.n || 160, t0 = val(q.t[0]), t1 = val(q.t[1]), sc = Object.create(S), pts = [];
         for (let i = 0; i <= n; i++) { sc.t = t0 + (t1 - t0) * i / n; pts.push([F(q.x)(sc), F(q.y)(sc)]); }
+        if (q.halo) el('path', { d: pathOf(pts) + (q.closed ? 'Z' : ''), class: 'ln-p pl-halo' }, gg);
         el('path', { d: pathOf(pts) + (q.closed ? 'Z' : ''), class: cls(q.cls, 'ln-p'), 'marker-end': q.arrow ? `url(#${id}${String(q.cls || 'ink').split(' ')[0]})` : null }, gg);
       } else if (k === 'path') {
         const upto = q.upto != null ? val(q.upto) : Infinity;
         el('path', { d: pathOf(rows.filter((r, i) => i <= upto).map(r => { const sc = row(r); return [val(q.x, sc), val(q.y, sc)]; })), class: cls(q.cls, 'ln-p') }, gg);
       } else if (k === 'line') {
         const a = [val(q.from[0]), val(q.from[1])], b = [val(q.to[0]), val(q.to[1])], c = String(q.cls || 'ink').split(' ')[0];
+        if (q.halo) el('line', { x1: X(a[0]), y1: Y(a[1]), x2: X(b[0]), y2: Y(b[1]), class: 'ln-p pl-halo' }, gg);
         el('line', Object.assign({ x1: X(a[0]), y1: Y(a[1]), x2: X(b[0]), y2: Y(b[1]), class: cls(q.cls, 'ln-p'), 'marker-end': q.arrow ? `url(#${id}${c})` : null }, q.tip ? { 'data-tip': q.tip } : {}), gg);
         const tpos = q.label_pos != null ? q.label_pos : 0.5; label(q, X(a[0] + (b[0] - a[0]) * tpos), Y(a[1] + (b[1] - a[1]) * tpos), S);
       } else if (k === 'segments') {
@@ -809,7 +814,7 @@
           el('rect', Object.assign({ x: Math.min(X(x), X(x + w)), y: Math.min(Y(y), Y(y + h)), width: Math.abs(X(x + w) - X(x)), height: Math.abs(Y(y + h) - Y(y)), class: cls(q.cls_col ? r[q.cls_col] : pick(q, sc), 'pg') }, t ? { 'data-tip': t } : {}), gg); });
       } else if (k === 'text') {
         const px = X(val(q.at[0])), py = Y(val(q.at[1]));
-        if (q.tex) mathNode(top, String(q.tex), px, py, q.size || 14, q.cls || '', q.anchor);
+        if (q.tex) mathNode(top, String(q.tex), px, py, q.size || 14, (q.cls || '') + (q.halo ? ' halo' : ''), q.anchor);
         else el('text', { x: px, y: py + 4, 'text-anchor': q.anchor || 'middle', class: 'pl-text ' + (q.cls ? 'pl-' + q.cls : '') }, top, tip(q.text, S));
       } else if (k === 'solver') {
         // nonlinear least squares in two unknowns: Gauss-Newton or Levenberg-Marquardt, numeric Jacobian

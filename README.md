@@ -227,5 +227,18 @@ readouts:
   - {label: "LM final cost", expr: "lm_cost", digits: 3}          # a solver sets <as>_x, _y, _cost, _n
 ```
 
+Annotating a picture (a CAD render, a photo): put it in as the first mark and draw on top in its
+own pixel coordinates (`flip_y: true`, `equal: true`, `axes: false`). The image is inlined into the page.
+
+```
+  - {kind: image, src: media/render.png, at: [240, 240], w: 2770, h: 1940}   # top-left corner and size
+  - {kind: line, from: [1590, 1204], to: [194, 2124], cls: hl thick, arrow: true, halo: true,
+     label: 'x_b', label_pos: 1, label_halo: true}
+```
+
+`halo: true` draws a white outline under a line or curve, `label_halo` / `halo` on text keeps labels
+readable over the picture. `posts/bluerov-frames` shows the full case, including how its
+`make_post.py` recovers the view's projection from the render so the axes line up with the vehicle.
+
 Line classes: `ink`, `hl`, `muted`, `faint`, plus `dash`, `thin`, `thick`.
 `clip_box: [x0, y0, x1, y1]` clips a single mark. Use `filter:` (a formula) to skip rows.

@@ -9,6 +9,7 @@ Output goes to dist/. Each post becomes one self-contained index.html.
 Needs:  pip install markdown pyyaml
 """
 import argparse
+import base64
 import csv, html, json, os, re, shutil, sys
 from pathlib import Path
 
@@ -77,6 +78,11 @@ def load_nested(post_dir, node):
     elif isinstance(node, dict):
         for v in node.values():
             load_nested(post_dir, v)
+        if node.get("kind") == "image" and isinstance(node.get("src"), str) and not node["src"].startswith("data:"):
+            # pictures inside drawings are inlined, so the page stays a single file
+            f = post_dir / node["src"]
+            mime = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".svg": "image/svg+xml", ".webp": "image/webp"}.get(f.suffix.lower(), "application/octet-stream")
+            node["src"] = f"data:{mime};base64," + base64.b64encode(f.read_bytes()).decode()
         if isinstance(node.get("data"), str) and "rows" not in node:
             node["rows"] = load_rows(post_dir, node["data"], node.get("where"))
 
