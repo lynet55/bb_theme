@@ -1,0 +1,10 @@
+% Builds cnn.pdf: the figure alone, tightly cropped.
+%   pdflatex cnn_standalone.tex
+\documentclass[tikz, border=2pt]{standalone}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usetikzlibrary{arrows.meta, positioning}
+\newcommand{\cnnimg}{img/depth.png}
+\begin{document}
+\input{cnn.tex}
+\end{document}

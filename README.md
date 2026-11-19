@@ -21,7 +21,7 @@ python export.py dist/slam-basics/index.html --fig tri --format pdf --diagram-on
 | `theme/` | `template.html`, `report.css`, `charts.js` (all figure types) |
 | `templates/post/` | Starter post copied by `build.py new` |
 | `posts/` | Example posts: SLAM basics, DeFM control stack, two AUV navigation stacks |
-| `latex/` | Hand-written TikZ figures (VAE), each with a standalone build |
+| `latex/` | Hand-written TikZ figures (VAE, convolutional encoder), each with a standalone build |
 | `site.yaml` | Site name, author, footer |
 
 ## Using it from another repository
