@@ -741,13 +741,13 @@
     el('rect', { x: m.l, y: m.t, width: VW - m.l - m.r, height: H - m.t - m.b }, cp);
     const mk = el('defs', {}, svg); ['ink', 'hl', 'muted'].forEach(c => { const q = el('marker', { id: id + c, viewBox: '0 0 8 8', refX: 7.5, refY: 4, markerWidth: 7, markerHeight: 7, orient: 'auto', markerUnits: 'userSpaceOnUse' }, mk); el('path', { d: 'M0,0 L8,4 L0,8 z', class: 'pl-ah pl-' + c }, q); });
     if (ax) {
-      const tx = ticks(xr[0], xr[1], spec.xticks || 6), ty = ticks(yr[0], yr[1], spec.yticks || 5);
-      if (spec.grid !== false) { tx.forEach(v => el('line', { x1: X(v), x2: X(v), y1: m.t, y2: H - m.b, class: 'g-grid' }, svg)); ty.forEach(v => el('line', { x1: m.l, x2: VW - m.r, y1: Y(v), y2: Y(v), class: 'g-grid' }, svg)); }
+      const xa = spec.axis_xmax != null ? spec.axis_xmax : xr[1], tx = ticks(xr[0], xa, spec.xticks || 6).filter(v => v <= xa), ty = ticks(yr[0], yr[1], spec.yticks || 5);
+      if (spec.grid !== false) { tx.forEach(v => el('line', { x1: X(v), x2: X(v), y1: m.t, y2: H - m.b, class: 'g-grid' }, svg)); ty.forEach(v => el('line', { x1: m.l, x2: X(xa), y1: Y(v), y2: Y(v), class: 'g-grid' }, svg)); }
       const yb = spec.flip_y ? m.t : H - m.b;
-      el('line', { x1: m.l, x2: VW - m.r, y1: yb, y2: yb, class: 'g-base' }, svg); el('line', { x1: m.l, x2: m.l, y1: m.t, y2: H - m.b, class: 'g-spine' }, svg);
+      el('line', { x1: m.l, x2: X(xa), y1: yb, y2: yb, class: 'g-base' }, svg); el('line', { x1: m.l, x2: m.l, y1: m.t, y2: H - m.b, class: 'g-spine' }, svg);
       tx.forEach(v => { el('line', { x1: X(v), x2: X(v), y1: yb, y2: yb + (spec.flip_y ? -4 : 4), class: 'g-tk' }, svg); el('text', { x: X(v), y: spec.flip_y ? yb - 7 : yb + 15, 'text-anchor': 'middle', class: 'g-tick' }, svg, fmt(v)); });
       ty.forEach(v => { el('line', { x1: m.l - 4, x2: m.l, y1: Y(v), y2: Y(v), class: 'g-tk' }, svg); el('text', { x: m.l - 7, y: Y(v) + 4, 'text-anchor': 'end', class: 'g-tick' }, svg, fmt(v)); });
-      if (spec.xlabel) mathNode(svg, spec.xlabel, (m.l + VW - m.r) / 2, spec.flip_y ? 11 : H - 9, 14);
+      if (spec.xlabel) mathNode(svg, spec.xlabel, (m.l + X(xa)) / 2, spec.flip_y ? 11 : H - 9, 14);
       if (spec.ylabel) mathNode(svg, spec.ylabel, 6, spec.flip_y ? H - 8 : 12, 14, '', 'start');
     }
     const g = el('g', { 'clip-path': spec.clip === false ? null : `url(#${id})` }, svg), top = el('g', {}, svg);
@@ -816,6 +816,77 @@
         const px = X(val(q.at[0])), py = Y(val(q.at[1]));
         if (q.tex) mathNode(top, String(q.tex), px, py, q.size || 14, (q.cls || '') + (q.halo ? ' halo' : ''), q.anchor);
         else el('text', { x: px, y: py + 4, 'text-anchor': q.anchor || 'middle', class: 'pl-text ' + (q.cls ? 'pl-' + q.cls : '') }, top, tip(q.text, S));
+      } else if (k === 'rays') {
+        // Ray-cast range sensor (e.g. a forward-looking sonar) against vertical obstacles and a flat seabed.
+        // World frame NED; the drawing shows the horizontal plane with east to the right and north up.
+        const n = Math.round(val(q.n)), fov = val(q.fov) * Math.PI / 180, rmin = val(q.rmin), rmax = val(q.rmax);
+        const pn = [val(q.at[0]), val(q.at[1]), val(q.at[2])];
+        const [ph, th, ps] = (q.att || [0, 0, 0]).map(a => val(a) * Math.PI / 180);
+        const cf = Math.cos(ph), sf = Math.sin(ph), ct = Math.cos(th), st2 = Math.sin(th), cp = Math.cos(ps), sp = Math.sin(ps);
+        const Rnb = [[cp * ct, -sp * cf + cp * st2 * sf, sp * sf + cp * cf * st2],
+                     [sp * ct, cp * cf + sf * st2 * sp, -cp * sf + st2 * sp * cf],
+                     [-st2, ct * sf, ct * cf]];
+        const obs = q.obstacles || [], E = v => X(v[1]), Nn = v => Y(v[0]);
+        if (q.draw_obstacles !== false) obs.forEach(o => {
+          if (o.circle) { const [cn, ce, rr] = o.circle; el('ellipse', { cx: X(ce), cy: Y(cn), rx: Math.abs(X(ce + rr) - X(ce)), ry: Math.abs(Y(cn + rr) - Y(cn)), class: 'pg pl-hatch' }, gg); }
+          if (o.segment) { const [n1, e1, n2, e2] = o.segment; el('line', { x1: X(e1), y1: Y(n1), x2: X(e2), y2: Y(n2), class: 'ln-p pl-ink pl-thick' }, gg); }
+        });
+        const out = [], kinds = [];
+        let hits = 0, blind = 0, floor = 0, rmn = Infinity;
+        for (let j = 1; j <= n; j++) {
+          const b = -fov / 2 + (j - 1) * fov / (n - 1), db = [Math.cos(b), Math.sin(b), 0];
+          const d = Rnb.map(r => r[0] * db[0] + r[1] * db[1] + r[2] * db[2]);
+          let best = Infinity, what = 'none';
+          obs.forEach(o => {
+            let sh = Infinity;
+            if (o.circle) {
+              const [cn, ce, rr] = o.circle, ox = pn[0] - cn, oy = pn[1] - ce, A = d[0] * d[0] + d[1] * d[1], B = 2 * (d[0] * ox + d[1] * oy), C = ox * ox + oy * oy - rr * rr, D = B * B - 4 * A * C;
+              if (A > 1e-12 && D >= 0) { const s1 = (-B - Math.sqrt(D)) / (2 * A), s2 = (-B + Math.sqrt(D)) / (2 * A); sh = s1 > 1e-9 ? s1 : (s2 > 1e-9 ? s2 : Infinity); }
+            } else if (o.segment) {
+              const [n1, e1, n2, e2] = o.segment, ux = n2 - n1, uy = e2 - e1, den = d[0] * uy - d[1] * ux;
+              if (Math.abs(den) > 1e-12) { const wx = n1 - pn[0], wy = e1 - pn[1], s0 = (wx * uy - wy * ux) / den, t0 = (wx * d[1] - wy * d[0]) / den; if (s0 > 1e-9 && t0 >= 0 && t0 <= 1) sh = s0; }
+            } else if (o.floor != null && d[2] > 1e-9) { sh = (o.floor - pn[2]) / d[2]; }
+            else if (o.surface && d[2] < -1e-9) { sh = -pn[2] / d[2]; }
+            if (sh < best) { best = sh; what = o.floor != null ? 'floor' : o.surface ? 'surface' : 'obstacle'; }
+          });
+          let r = rmax, kind = 'none';
+          if (best >= rmin && best <= rmax) { r = best; kind = what === 'obstacle' ? 'hit' : 'floor'; if (kind === 'hit') hits++; else floor++; rmn = Math.min(rmn, r); }
+          else if (best < rmin) { kind = 'blind'; blind++; }
+          out.push(r); kinds.push(kind); S[(q.as || 'r') + j] = r;
+          // draw the beam's horizontal projection; s is distance along the 3-D beam
+          const sDraw = kind === 'blind' ? best : Math.min(best, rmax), end = [pn[0] + sDraw * d[0], pn[1] + sDraw * d[1]];
+          const full = [pn[0] + rmax * d[0], pn[1] + rmax * d[1]];
+          const tipTxt = `beam ${j}: β = ${(b * 180 / Math.PI).toFixed(1)}°, r = ${r.toFixed(2)} m` + (kind === 'none' ? ' (no return)' : kind === 'blind' ? ` (hit at ${best.toFixed(2)} m, inside the blind zone)` : kind === 'floor' ? ' (seabed)' : '');
+          const g2 = el('g', { 'data-tip': tipTxt }, gg);
+          el('line', { x1: E(pn), y1: Nn(pn), x2: E(full), y2: Nn(full), class: 'ln-p pl-faint pl-dash' }, g2);
+          if (kind !== 'none') el('line', { x1: E(pn), y1: Nn(pn), x2: E(end), y2: Nn(end), class: 'ln-p ' + (kind === 'hit' ? 'pl-hl' : kind === 'floor' ? 'pl-ink' : 'pl-muted') + ' pl-thin' }, g2);
+          if (kind === 'hit') el('circle', { cx: E(end), cy: Nn(end), r: 3.2, class: 'pt pl-hl' }, g2);
+          else if (kind === 'floor') { const z = 3.2; el('path', { d: `M${E(end) - z},${Nn(end) - z}L${E(end) + z},${Nn(end) + z}M${E(end) - z},${Nn(end) + z}L${E(end) + z},${Nn(end) - z}`, class: 'pt sh-cross pl-ink' }, g2); }
+          else if (kind === 'blind') el('circle', { cx: E(end), cy: Nn(end), r: 3.2, class: 'pt sh-ring pl-muted' }, g2);
+          el('line', { x1: E(pn), y1: Nn(pn), x2: E(full), y2: Nn(full), class: 'st-hit' }, g2);
+        }
+        S[(q.as || 'r') + '_hits'] = hits; S[(q.as || 'r') + '_floor'] = floor; S[(q.as || 'r') + '_blind'] = blind; S[(q.as || 'r') + '_min'] = isFinite(rmn) ? rmn : NaN;
+        S['__' + (q.as || 'r')] = { r: out, kinds, rmax, n };
+        // blind zone (horizontal projection of r_min) and the vehicle
+        el('ellipse', { cx: E(pn), cy: Nn(pn), rx: Math.abs(X(pn[1] + rmin) - X(pn[1])), ry: Math.abs(Y(pn[0] + rmin) - Y(pn[0])), class: 'pg pl-muted pl-dash' }, gg);
+        const L = val(q.size || 0.6), hv = [Math.cos(ps), Math.sin(ps)], sv = [-Math.sin(ps), Math.cos(ps)];
+        const P = (a, c) => [pn[0] + a * L * hv[0] + c * L * sv[0], pn[1] + a * L * hv[1] + c * L * sv[1]];
+        el('path', { d: [P(0.9, 0), P(-0.6, 0.55), P(-0.35, 0), P(-0.6, -0.55)].map((v, i) => (i ? 'L' : 'M') + E(v).toFixed(1) + ',' + Nn(v).toFixed(1)).join('') + 'Z', class: 'pg pl-solid' }, gg);
+      } else if (k === 'rangebars') {
+        // the range vector r from a `rays` mark, one bar per beam
+        const R2 = S['__' + (q.from || 'r')]; if (!R2) return;
+        const x0 = val(q.at[0]), y0 = val(q.at[1]), w = val(q.w), h = val(q.h), bw = w / R2.n;
+        el('rect', { x: X(x0), y: Y(y0 + h), width: X(x0 + w) - X(x0), height: Y(y0) - Y(y0 + h), class: 'pg pl-paper' }, top);
+        R2.r.forEach((r, i) => {
+          const kd = R2.kinds[i], hh = r / R2.rmax * h, cl = kd === 'hit' ? 'pl-solid' : kd === 'floor' ? 'pl-dark' : kd === 'blind' ? 'pl-hatch' : 'pl-light';
+          el('rect', { x: X(x0 + i * bw + 0.12 * bw), y: Y(y0 + hh), width: X(x0 + 0.76 * bw) - X(x0), height: Y(y0) - Y(y0 + hh), class: 'pg ' + cl, 'data-tip': `r${i + 1} = ${r.toFixed(2)} m` + (kd === 'none' ? ' (no return)' : kd === 'blind' ? ' (blind zone)' : kd === 'floor' ? ' (seabed)' : '') }, top);
+        });
+        el('line', { x1: X(x0), x2: X(x0 + w), y1: Y(y0 + h), y2: Y(y0 + h), class: 'ln-p pl-muted pl-dash pl-thin' }, top);
+        el('text', { x: X(x0) - 5, y: Y(y0 + h) + 4, 'text-anchor': 'end', class: 'pl-text pl-small' }, top, `${R2.rmax} m`);
+        el('text', { x: X(x0) - 5, y: Y(y0) + 4, 'text-anchor': 'end', class: 'pl-text pl-small' }, top, '0');
+        el('text', { x: X(x0 + bw / 2), y: Y(y0) + 14, 'text-anchor': 'middle', class: 'pl-text pl-small' }, top, '1');
+        el('text', { x: X(x0 + w - bw / 2), y: Y(y0) + 14, 'text-anchor': 'middle', class: 'pl-text pl-small' }, top, String(R2.n));
+        if (q.label) mathNode(top, String(q.label), X(x0 + w / 2), Y(y0) + 22, 15);
       } else if (k === 'solver') {
         // nonlinear least squares in two unknowns: Gauss-Newton or Levenberg-Marquardt, numeric Jacobian
         const rs = q.residuals.map(F), sc = Object.create(S), res = (x, y) => { sc.x = x; sc.y = y; return rs.map(f => f(sc)); };

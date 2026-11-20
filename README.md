@@ -240,5 +240,9 @@ own pixel coordinates (`flip_y: true`, `equal: true`, `axes: false`). The image 
 readable over the picture. `posts/bluerov-frames` shows the full case, including how its
 `make_post.py` recovers the view's projection from the render so the axes line up with the vehicle.
 
+Range sensors: a `rays` mark ray-casts N beams over a field of view from a pose in NED against vertical
+cylinders, wall segments and a flat seabed, and a `rangebars` mark draws the resulting range vector
+(see `posts/fls-sonar`). `axis_xmax` stops the axes short of the right edge, to leave room for a panel.
+
 Line classes: `ink`, `hl`, `muted`, `faint`, plus `dash`, `thin`, `thick`.
 `clip_box: [x0, y0, x1, y1]` clips a single mark. Use `filter:` (a formula) to skip rows.
