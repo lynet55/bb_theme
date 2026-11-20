@@ -1,0 +1,10 @@
+% Builds side.pdf on its own:  pdflatex side_standalone.tex
+\documentclass[tikz, border=3pt]{standalone}
+\usepackage{amsmath,amssymb,graphicx}
+\usetikzlibrary{arrows.meta, calc}
+\newcommand{\rovstyledir}{.}
+\newcommand{\rovimgdir}{img}
+\newcommand{\rovfigwidth}{12cm}
+\begin{document}
+\input{side.tex}
+\end{document}

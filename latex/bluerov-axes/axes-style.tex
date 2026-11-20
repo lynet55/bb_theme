@@ -1,0 +1,19 @@
+% Shared styles for the BlueROV2 Heavy axis figures. Black only, to match the silhouettes.
+% Axes keep a thin white casing so they stay visible where they cross the black silhouette.
+\providecommand{\rovimgdir}{latex/bluerov-axes/img}
+\providecommand{\rovfigwidth}{0.8\linewidth}
+\tikzset{
+  rov axis/.style={black, line width=0.9pt, -{Stealth[length=6pt, width=4.5pt]},
+                   preaction={draw=white, line width=3.2pt, -{Stealth[length=7.5pt, width=6.5pt]}}},
+  rov rot/.style={black, line width=0.7pt, -{Stealth[length=5pt, width=4pt]},
+                  preaction={draw=white, line width=2.8pt, -{Stealth[length=6.5pt, width=6pt]}}},
+  rov lbl/.style={black, inner sep=1.2pt, font=\normalsize},
+  rov sub/.style={black, inner sep=1pt, font=\footnotesize},
+  rov chip/.style={black, fill=white, rounded corners=1pt, inner sep=1.2pt, font=\normalsize},
+}
+% axis pointing out of the page (dot) or into the page (cross), drawn as a white disc with a black ring
+\newcommand{\rovout}[1]{%
+  \fill[white] #1 circle (5.2pt); \draw[black, line width=0.8pt] #1 circle (4.2pt); \fill[black] #1 circle (1.3pt);}
+\newcommand{\rovin}[1]{%
+  \fill[white] #1 circle (5.2pt); \draw[black, line width=0.8pt] #1 circle (4.2pt);
+  \draw[black, line width=0.8pt] #1 ++(-2.9pt,-2.9pt) -- ++(5.8pt,5.8pt) #1 ++(-2.9pt,2.9pt) -- ++(5.8pt,-5.8pt);}

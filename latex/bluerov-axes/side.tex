@@ -1,0 +1,25 @@
+% BlueROV2 Heavy, side view from starboard (bow to the right): body frame {b} in Fossen / SNAME notation.
+% x_b forward (surge u), z_b down (heave w), y_b starboard, out of the page (sway v), pitch rate q.
+% Use inside a figure:  \input{latex/bluerov-axes/side.tex}
+% Needs tikz with \usetikzlibrary{arrows.meta, calc}, graphicx, amsmath.
+\providecommand{\rovstyledir}{latex/bluerov-axes}
+\input{\rovstyledir/axes-style.tex}
+\begin{tikzpicture}
+  \node[inner sep=0, anchor=south west] (img) at (0,0) {\includegraphics[width=\rovfigwidth]{\rovimgdir/bluerov2_heavy_side.pdf}};
+  \begin{scope}[x={(img.south east)}, y={(img.north west)}]
+    % origin o_b: same longitudinal station as in the top view (0.478 of the length from the bow), mid-height
+    \coordinate (O) at (0.521, 0.501);
+    \draw[rov axis] (O) -- (1.12, 0.501) coordinate (tx);
+    \node[rov lbl, right] (lx) at (tx) {$x_b$};
+    \node[rov sub, anchor=north west] at (lx.south west) {surge $u$};
+    \draw[rov axis] (O) -- (0.521, -0.17) coordinate (tz);
+    \node[rov lbl, below] (lz) at (tz) {$z_b$};
+    \node[rov sub, anchor=west] at ($(tz)+(0.012,-0.045)$) {heave $w$};
+    % pitch q about y_b: z_b towards x_b, counter-clockwise seen from starboard
+    \draw[rov rot] (O) ++(-140:0.075 and 0.135) arc[start angle=-140, end angle=130, x radius=0.075, y radius=0.135];
+    \node[rov chip] at ($(O)+(150:0.105 and 0.19)$) {$q$};
+    \rovout{(O)}
+    \node[rov chip, anchor=south west] at ($(O)+(0.012, 0.03)$) {$y_b$,\ \footnotesize sway $v$};
+    \node[rov chip, anchor=north west] at ($(O)+(0.014,-0.03)$) {$o_b$};
+  \end{scope}
+\end{tikzpicture}

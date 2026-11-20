@@ -1,0 +1,25 @@
+% BlueROV2 Heavy, top view (bow up): body frame {b} in Fossen / SNAME notation.
+% x_b forward (surge u), y_b starboard (sway v), z_b down into the page (heave w), yaw rate r.
+% Use inside a figure:  \input{latex/bluerov-axes/top.tex}
+% Needs tikz with \usetikzlibrary{arrows.meta}, graphicx, amsmath.
+\providecommand{\rovstyledir}{latex/bluerov-axes}
+\input{\rovstyledir/axes-style.tex}
+\begin{tikzpicture}
+  \node[inner sep=0, anchor=south west] (img) at (0,0) {\includegraphics[width=\rovfigwidth]{\rovimgdir/bluerov2_heavy_top.pdf}};
+  \begin{scope}[x={(img.south east)}, y={(img.north west)}]
+    % origin o_b: centre line, midway between the vertical thrusters (measured on the silhouette)
+    \coordinate (O) at (0.4998, 0.522);
+    \draw[rov axis] (O) -- (0.4998, 1.13) coordinate (tx);
+    \node[rov lbl, above] (lx) at (tx) {$x_b$};
+    \node[rov sub, anchor=west] at ($(tx)+(0.012,-0.03)$) {surge $u$};
+    \draw[rov axis] (O) -- (1.12, 0.522) coordinate (ty);
+    \node[rov lbl, right] (ly) at (ty) {$y_b$};
+    \node[rov sub, anchor=north west] at (ly.south west) {sway $v$};
+    % yaw r about z_b: x_b towards y_b, clockwise seen from above
+    \draw[rov rot] (O) ++(140:0.075 and 0.094) arc[start angle=140, end angle=-130, x radius=0.075, y radius=0.094];
+    \node[rov chip] at ($(O)+(-150:0.105 and 0.13)$) {$r$};
+    \rovin{(O)}
+    \node[rov chip, anchor=north west] at ($(O)+(0.012,-0.022)$) {$z_b$,\ \footnotesize heave $w$};
+    \node[rov chip, anchor=south west] at ($(O)+(0.014, 0.022)$) {$o_b$};
+  \end{scope}
+\end{tikzpicture}
