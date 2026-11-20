@@ -40,7 +40,7 @@ marks:
   - {kind: text, at: [0.15, 0.56], tex: '\beta_j', cls: hl}
   - {kind: line, from: [0, 0], to: [0, 1.3], cls: ink, arrow: true, label: 'x_b', label_pos: 1, label_off: [14, 0], label_anchor: start}
   - {kind: line, from: [0, 0], to: [1.38, 0], cls: ink, arrow: true, label: 'y_b', label_pos: 1, label_off: [0, 14]}
-  - {kind: text, at: [0.62, 0.96], tex: '\mathbf{d}^b_j', cls: hl}
+  - {kind: text, at: [0.49, 0.665], tex: '\mathbf{d}^b_j', cls: hl, size: 14, halo: true}
   - {kind: text, at: [-1.12, -0.1], tex: '\beta_1 = -90^\circ'}
   - {kind: text, at: [1.12, -0.1], tex: '\beta_{16} = 90^\circ'}
   - {kind: point, at: [0, 0], shape: square, size: 4.5, cls: ink, label: 'o_b', label_off: [-12, 14], label_anchor: end}
